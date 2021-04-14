@@ -10,7 +10,7 @@
             "request": "launch",
             "args": ["${workspaceFolder}/src/index.ts"],
             "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
-            "sourceMaps": true,
+            "sourceMaps": false,
             "cwd": "${workspaceRoot}",
             "protocol": "inspector"
         }
