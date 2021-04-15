@@ -1,6 +1,9 @@
 import { Application } from "express";
 import Handlebars from "handlebars";
 import exphbs from "express-handlebars";
+import readEnvironment from "./environment";
+
+const env = readEnvironment();
 
 export default (app: Application) => {
     // add handlebars
@@ -35,8 +38,9 @@ export default (app: Application) => {
     });
 };
 
-export const buildContext = () => {
+export const buildContext = (user: any | undefined) => {
     return {
-        PAGE_TITLE: process.env.PAGE_TITLE || "My App",
+        user,
+        PAGE_TITLE: env.ui.pageTitle,
     };
 };

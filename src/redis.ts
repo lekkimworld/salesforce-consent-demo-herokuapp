@@ -1,40 +1,27 @@
-import { createClient as createRedisClient } from "redis";
-import { URL } from "url";
+import { createClient as createRedisClient, ClientOpts } from "redis";
 import { promisify } from "util";
+import readEnvironment from "./environment";
 
-const CONNECTION_TIMEOUT = process.env.REDIS_CONNECTION_TIMEOUT
-    ? Number.parseInt(process.env.REDIS_CONNECTION_TIMEOUT)
-    : 20000;
+const env = readEnvironment();
 
 const client = (function () {
-    const redis_uri = process.env.REDIS_TLS_URL
-        ? new URL(process.env.REDIS_TLS_URL as string)
-        : process.env.REDIS_URL
-        ? new URL(process.env.REDIS_URL as string)
-        : undefined;
-    if (
-        process.env.REDIS_URL &&
-        redis_uri &&
-        redis_uri.protocol!.indexOf("rediss") === 0
-    ) {
-        return createRedisClient({
-            port: Number.parseInt(redis_uri.port!),
-            host: redis_uri.hostname!,
-            password: redis_uri.password,
-            db: 0,
-            tls: {
-                rejectUnauthorized: false,
-                requestCert: true,
-                agent: false,
-            },
-            connect_timeout: CONNECTION_TIMEOUT,
-        });
-    } else {
-        return createRedisClient({
-            url: process.env.REDIS_URL as string,
-            connect_timeout: CONNECTION_TIMEOUT,
-        });
+    const base_config = {
+        port: env.redis.port,
+        host: env.redis.host,
+        db: 0,
+        connect_timeout: env.redis.connectionTimeout,
+    } as ClientOpts;
+    if (env.redis.password) base_config.password = env.redis.password;
+
+    if (env.redis.secure) {
+        base_config.tls = {
+            rejectUnauthorized: false,
+            requestCert: true,
+            agent: false,
+        };
     }
+
+    return createRedisClient(base_config);
 })();
 
 const promisifiedClient = {
