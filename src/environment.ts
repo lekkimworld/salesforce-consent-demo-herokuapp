@@ -15,6 +15,7 @@ interface OIDC {
     redirectUri: string;
     providerUrl: string;
     scopes: string;
+    prompt: string;
 }
 interface Redis {
     connectionTimeout: number;
@@ -57,6 +58,12 @@ export const readEnvironment = () => {
     env.oidc.clientSecret = process.env.OIDC_CLIENT_SECRET as string;
     env.oidc.redirectUri = process.env.OIDC_REDIRECT_URI as string;
     env.oidc.scopes = process.env.OIDC_SCOPES || "openid email";
+    env.oidc.prompt = Object.prototype.hasOwnProperty.call(
+        process.env,
+        "OIDC_PROMPT"
+    )
+        ? (process.env.OIDC_PROMPT as string)
+        : "login";
     env.oidc.providerUrl =
         (process.env.OIDC_PROVIDER_URL as string) ||
         "https://login.salesforce.com";

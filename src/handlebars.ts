@@ -40,6 +40,7 @@ export default (app: Application) => {
 
 export const buildContext = (user: any | undefined) => {
     return {
+        portal: env.oidc.providerUrl,
         user,
         PAGE_TITLE: env.ui.pageTitle,
     };

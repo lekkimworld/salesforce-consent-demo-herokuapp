@@ -42,6 +42,10 @@ const getAccessToken = async (force_refresh: boolean = false) => {
 
     // get json and cache
     const token_data = await resp.json();
+    if (token_data.error) {
+        const msg = `Salesforce ERROR - ${token_data.error}: ${token_data.error_description}`;
+        throw Error(msg);
+    }
     instance_url = token_data.instance_url;
     access_token = token_data.access_token;
     return access_token;
@@ -51,16 +55,14 @@ const doGet = async (args: GetArgs): Promise<any> => {
     const access_token = await getAccessToken(args.forceRefresh);
 
     // do request
-    const resp = await fetch(
-        args.url ? args.url : `${instance_url}${args.path}`,
-        {
-            headers: {
-                "content-type": "application/json",
-                accepts: "application/json",
-                authorization: `Bearer ${access_token}`,
-            },
-        }
-    );
+    const url = args.url ? args.url : `${instance_url}${args.path}`;
+    const resp = await fetch(url, {
+        headers: {
+            "content-type": "application/json",
+            accepts: "application/json",
+            authorization: `Bearer ${access_token}`,
+        },
+    });
     if (resp.status === 401) {
         return doGet(Object.assign({}, args, { forceRefresh: true }));
     }

@@ -1,4 +1,19 @@
 <div class="rounded-md bg-blue-400 mx-auto max-w-sm p-6">
     <img src="{{user.photo}}" class="w-10 h-10 rounded-full">        
     <span>Hello {{user.fullname}} World!</span>
+    <p>ToS: {{user.terms.tos}}</p>
+    <p>Telemetry: {{user.terms.telemetry}}</p>
+    <p>Order: {{user.terms.order}}</p>
+    <p>Newsletter: {{user.terms.newsletter}}</p>
+    
 </div>
+{{#if user.terms.telemetry}}
+<p>
+    We are gathering app telemetry based on your preferences and consent.
+</p>
+{{/if}}
+{{#if user.terms.order}}
+<p>
+    <a href="/shop" class="text-blue-500">Shop</a>
+</p>
+{{/if}}

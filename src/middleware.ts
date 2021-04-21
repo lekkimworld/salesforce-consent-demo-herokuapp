@@ -37,6 +37,8 @@ export default (app: Application) => {
                 .type(ex.type)
                 .status(ex.statusCode)
                 .send(new ErrorObject(ex.message, ex.error));
+        } else {
+            return res.status(500).send(new ErrorObject(err.message, err));
         }
         next();
     });

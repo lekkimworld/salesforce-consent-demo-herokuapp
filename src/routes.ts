@@ -18,7 +18,7 @@ export default (app: Application) => {
         renderTemplate(res, "auth_root");
     });
 
-    app.get("/products", async (_req, res) => {
-        renderTemplate(res, "products");
+    app.get("/shop", async (_req, res) => {
+        renderTemplate(res, "shop");
     });
 };

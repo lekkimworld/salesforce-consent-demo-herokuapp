@@ -1,13 +1,50 @@
-<h1 class="text-gray-900 font-bold text-xl">Terms &amp; Conditions</h1>
+<h1 class="text-gray-900 font-bold text-xl">Data Privacy and Consent</h1>
 <div class="text-gray-900 text-sm">
     <p class="pt-4">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut lobortis vel ante at varius. Sed pellentesque urna a libero semper, convallis laoreet tellus sollicitudin. Quisque fermentum in nisi in hendrerit. Vestibulum sit amet cursus eros. Pellentesque dapibus ante magna, et ultricies tellus aliquam vel. Nam non tellus porttitor, sollicitudin elit non, malesuada lectus. Nullam finibus placerat congue.
+        At My Fitness Tracker we respect your privacy and your rights to control your own data 
+        but we do have certain terms you must accept in order to do business with us. Below you'll 
+        see a number of areas where you can <span class="text-blue-500">Opt In</span> or <span class="text-blue-500">Opt Out</span> bsaed on your preferences and 
+        what it means.
     </p>
     <p class="pt-4">
-        Duis ac risus ullamcorper, gravida urna vehicula, pretium nulla. Sed varius nec ligula in placerat. Fusce aliquet arcu tortor, eu consequat nisl rhoncus in. Praesent id massa lorem. Maecenas sagittis sodales nisi id pharetra. Sed et fringilla nisl, a fringilla tortor. Etiam sit amet lobortis ex, a semper neque. Proin viverra massa lacus, quis venenatis arcu semper eu. Cras magna ex, mollis ac justo sit amet, varius ornare ante. Quisque convallis sapien ut massa ullamcorper vulputate. Morbi et tincidunt ligula.
+        <input type="checkbox" name="telemetry" id="telemetry"> <label for="telemetry">Telemetry</label>
+    </p>
+    <p>
+        Telemetry is required for you to use this Fitness Tracker app. If you do not explicitly 
+        <span class="text-blue-500">Opt In</span> you cannot use this service and we will log 
+        you out of the app.
+    </p>
+    <p class="pt-4">
+        <input type="checkbox" name="order" id="order"> <label for="order">Order</label>
+    </p>
+    <p>
+        Order is required for you to order nutritional supplements, vitamings, branded apparal etc. 
+        from the website. If you do not <span class="text-blue-500">Opt In</span> you cannot use 
+        this part of the website. You may browse the catalog but not place an order online.
+    </p>
+    <p class="pt-4">
+        <input type="checkbox" name="newsletter" id="newsletter"> <label for="newsletter">Newsletter</label>
+    </p>
+    <p>
+        Our monthly newsletter is a great way for you to stay in the know. If you do not explicitly 
+        <span class="text-blue-500">Opt In</span> we will not send anything but transactional emails.
     </p>
     <div class="grid grid-cols-2 pt-4 gap-3">
-        <a href="/terms/accept" class="bg-green-500 text-center text-white rounded-md p-2 uppercase">Accept</a>
-        <a href="/terms/decline" class="bg-red-500 text-center text-white rounded-md p-2 uppercase">Decline</a>
+        <a href="#" id="btn_accept" class="bg-green-500 text-center text-white rounded-md p-2 uppercase">Accept Selected</a>
+        <a href="#" id="btn_decline" class="bg-red-500 text-center text-white rounded-md p-2 uppercase">Decline All</a>
     </div>
 </div>
+<script>
+    const $ = id => document.getElementById(id);
+    $("btn_decline").addEventListener("click", () => {
+        if (confirm("Are you sure you wish to decline all?")) {
+            document.location.href = "/terms/decline";
+        }
+    })
+    $("btn_accept").addEventListener("click", () => {
+        const telemetry = $("telemetry").checked;
+        const order = $("order").checked;
+        const newsletter = $("newsletter").checked;
+        document.location.href = `/terms/accept/${telemetry}/${order}/${newsletter}`;
+    })
+</script>

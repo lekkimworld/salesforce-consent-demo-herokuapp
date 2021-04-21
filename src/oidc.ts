@@ -34,6 +34,13 @@ export const getOidcClient = async () => {
     return client;
 };
 
+export class TermsData {
+    tos: boolean = false;
+    telemetry: boolean = false;
+    order: boolean = false;
+    newsletter: boolean = false;
+}
+
 export class AuthenticatedUser {
     fn: string;
     ln: string;
@@ -42,8 +49,7 @@ export class AuthenticatedUser {
     active: boolean;
     photo: string;
     userinfo: any;
-    termsAccepted: boolean = false;
-    termsVersion: string | undefined;
+    terms?: TermsData;
 
     constructor(userinfo: any) {
         this.fn = userinfo.given_name;
@@ -55,6 +61,69 @@ export class AuthenticatedUser {
         this.userinfo = userinfo;
     }
 }
+
+const updateUserTerms = (
+    user: AuthenticatedUser,
+    tos: boolean,
+    telemetry: boolean,
+    order: boolean,
+    newsletter: boolean
+) => {
+    if (!user.terms) user.terms = new TermsData();
+    console.log(
+        `Setting terms - tos: ${tos}, telemetry: ${telemetry}, order: ${order}, newsletter: ${newsletter}`
+    );
+    user.terms.tos = tos;
+    user.terms.telemetry = telemetry;
+    user.terms.order = order;
+    user.terms.newsletter = newsletter;
+};
+const isTermsOfServiceAccepted = (user: AuthenticatedUser) => {
+    return user.terms && user.terms.tos;
+};
+const writeConsentToSalesforce = async (
+    user: AuthenticatedUser,
+    _telemetry: boolean,
+    _order: boolean,
+    _newsletter: boolean
+) => {
+    await readConsentFromSalesforce(user);
+};
+const readConsentFromSalesforce = async (user: AuthenticatedUser) => {
+    const tc = await getSalesforceDataService(
+        `/consent/action/process?ids=${user.id}&verbose`
+    );
+    console.log(`Read Salesforce Consent data for user: ${user.id}`);
+    console.log(JSON.stringify(tc, undefined, 2));
+
+    // grab the first response (error in Salesforce API response) and parse data
+    const tcdata = tc[Object.keys(tc)[0]];
+    if (tcdata.result === "Success") {
+        // found user data - update terms object from Salesforce
+        const determineValue = (records: any[], purpose: string) => {
+            return records.reduce((prev: boolean, r: any) => {
+                if (prev === true) return prev;
+                if (
+                    r.objectConsulted === "ContactPointTypeConsent" &&
+                    r.purpose === purpose
+                )
+                    return r.value === "OPT_IN";
+                return false;
+            }, false);
+        };
+        const tos = determineValue(tcdata.explanation, "Terms of Service");
+        const telemetry = determineValue(tcdata.explanation, "Telemetry");
+        const order = determineValue(tcdata.explanation, "Online Order");
+        const newsletter = determineValue(tcdata.explanation, "Newsletter");
+        updateUserTerms(user, tos, telemetry, order, newsletter);
+    } else {
+        throw new HttpException(
+            417,
+            "Unable to read consent data for user from Salesforce",
+            undefined
+        );
+    }
+};
 
 /**
  * Browser payload when browser is asking for a OpenID Connect Provider
@@ -84,8 +153,9 @@ export const getAuthenticationUrl = async () => {
     let url = client.authorizationUrl({
         scope: env.oidc.scopes,
         nonce: nonce,
-        prompt: "login",
+        prompt: env.oidc.prompt,
     });
+    console.log(`Using OIDC URL: ${url}`);
 
     return {
         url: url,
@@ -118,7 +188,30 @@ export const ensureAuthenticated = (app: Application) => {
 
         // see if call for terms endpoints
         if (req.path.startsWith("/terms/accept")) {
-            req.session.user!.termsAccepted = true;
+            const match_result = req.path.match(
+                /\/terms\/accept\/(true|false)\/(true|false)\/(true|false)\/?/
+            );
+            if (!match_result)
+                throw new HttpException(
+                    417,
+                    "Invalid format for /terms/accept",
+                    undefined
+                );
+
+            // get consent elements
+            const telemetry = match_result[1] === "true";
+            const order = match_result[2] === "true";
+            const newsletter = match_result[3] === "true";
+
+            // write data to salesforce
+            await writeConsentToSalesforce(
+                req.session.user,
+                telemetry,
+                order,
+                newsletter
+            );
+
+            // redirect back to app
             return res.redirect("/");
         } else if (req.path.startsWith("/terms/decline")) {
             // logout the user
@@ -127,24 +220,19 @@ export const ensureAuthenticated = (app: Application) => {
             });
         }
 
-        // ensure terms and conditions
-        if (req.session.user.termsAccepted) return next();
+        // if we do not have the terms yet - redirect to terms page
+        if (!req.session.user.terms) return renderTemplate(res, "terms");
 
-        // we do not know if terms accepted - ask salesforce
-        const tc = await getSalesforceDataService(
-            `/consent/action/social?ids=${req.session.user.id}&verbose&purpose=${env.terms_purpose}`
-        );
+        // we do not know if terms - ask salesforce
+        await readConsentFromSalesforce(req.session.user);
 
-        // grab the first response (error in Salesforce API response)
-        const tcdata = tc[Object.keys(tc)[0]];
-        if (tcdata.result === "Success") {
-            // user has accepted terms and conditions
-            req.session.user.termsAccepted = true;
+        // ensure user accepted terms of service
+        if (!isTermsOfServiceAccepted(req.session.user)) {
+            console.log("User has not accepted terms of service");
+            return req.session.destroy((err?) => {
+                return renderTemplate(res, "terms_of_service_not_accepted");
+            });
         }
-
-        // see if terms accepted
-        if (!req.session.user.termsAccepted)
-            return renderTemplate(res, "terms");
 
         // all is okay - forward to application
         next();
