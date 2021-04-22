@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx ts-node src/index.ts",
     "watch": "npx ts-node-dev --respawn src/index.ts",
-    "build": "rm -rf public/images && mkdir -p public/images && cp dev/images/* public/images && grep LOGO_COLOR .env | cut -d'=' -f2 | base64 -D - > public/images/logo_color.png && grep LOGO_WHITE .env | cut -d'=' -f2 | base64 -D - > public/images/logo_white.png && npx tailwindcss-cli@latest build ./dev/css/styles.css -o public/css/styles.css"
+    "build": "rm -rf public/images && mkdir -p public/images && cp dev/images/* public/images && npx tailwindcss-cli@latest build ./dev/css/styles.css -o public/css/styles.css"
   },
   "author": "Mikkel Flindt Heisterberg",
   "license": "MIT",
