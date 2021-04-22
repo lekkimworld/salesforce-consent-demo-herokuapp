@@ -16,7 +16,23 @@
     <div class="pt-4 mx-2 max-w-sm sm:max-w-lg sm:mx-auto">
       <img src="/images/my_fitness_tracker_326x175.png" alt="Company Logo" class="">
       {{#if user}}
-      <a href="/oidc/logout" class="text-blue-500">Logout</a>
+      <ul>
+        <li class="menuitem inline">
+        <a href="/" class="text-blue-500">Home</a>
+        </li>
+      {{#if user.terms.order}}
+      <li class="menuitem inline">
+          <a href="/shop" class="text-blue-500">Shop</a>
+      </li>
+      {{/if}}
+      <li class="menuitem inline"><a href="/terms" class="text-blue-500">Data Privacy and Consent</a></li>
+      <li class="menuitem inline"><a href="/oidc/logout" class="text-blue-500">Logout</a></li>
+      </ul>
+      {{/if}}
+      {{#if user.terms.telemetry}}
+      <p class="text-gray-600 text-xs">
+          We are gathering app telemetry based on your preferences and consent.
+      </p>
       {{/if}}
       <div class="pt-6">
       {{{body}}}

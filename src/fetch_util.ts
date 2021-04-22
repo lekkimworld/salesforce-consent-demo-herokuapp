@@ -6,10 +6,20 @@ import { Client, Issuer } from "openid-client";
 
 const env = readEnvironment();
 
-interface GetArgs {
+type QueryArgs = {
+    [key: string]: string | number | boolean | Date | undefined;
+};
+type BodyArg = { [key: string]: any | undefined };
+interface FetchArgs {
     path?: string;
     url?: string;
     forceRefresh: boolean;
+    queryArgs?: QueryArgs;
+}
+
+interface GetArgs extends FetchArgs {}
+interface PatchArgs extends FetchArgs {
+    body?: BodyArg;
 }
 
 let instance_url: string;
@@ -50,13 +60,32 @@ const getAccessToken = async (force_refresh: boolean = false) => {
     access_token = token_data.access_token;
     return access_token;
 };
+const buildUrl = (args: FetchArgs): string => {
+    let url = args.url ? args.url : `${instance_url}${args.path}`;
+    if (!args.queryArgs) return url;
+    Object.keys(args.queryArgs!).forEach((key, idx) => {
+        const value = args.queryArgs![key];
+        const sep = idx === 0 ? "?" : "&";
+        if (value) {
+            url += `${sep}${key}=${
+                typeof value === "object"
+                    ? (value as Date).toISOString()
+                    : value
+            }`;
+        } else {
+            url += `${sep}${key}`;
+        }
+    });
+    return url;
+};
 const doGet = async (args: GetArgs): Promise<any> => {
     // get access_token
     const access_token = await getAccessToken(args.forceRefresh);
 
     // do request
-    const url = args.url ? args.url : `${instance_url}${args.path}`;
+    const url = buildUrl(args);
     const resp = await fetch(url, {
+        method: "GET",
         headers: {
             "content-type": "application/json",
             accepts: "application/json",
@@ -69,23 +98,72 @@ const doGet = async (args: GetArgs): Promise<any> => {
     const result = await resp.json();
     return result;
 };
+const doPatch = async (args: PatchArgs): Promise<any> => {
+    // get access_token
+    const access_token = await getAccessToken(args.forceRefresh);
+
+    // do request
+    const url = buildUrl(args);
+    const resp = await fetch(url, {
+        method: "PATCH",
+        headers: {
+            "content-type": "application/json",
+            accepts: "application/json",
+            authorization: `Bearer ${access_token}`,
+        },
+        body: args.body ? JSON.stringify(args.body) : "",
+    });
+    if (resp.status === 401) {
+        return doPatch(Object.assign({}, args, { forceRefresh: true }));
+    }
+    const result = await resp.json();
+    return result;
+};
 export const getSalesforceUrl = async (url: string) => {
     return doGet({
         url: url,
         forceRefresh: false,
     });
 };
-export const getSalesforcePath = async (path: string) => {
+export const getSalesforcePath = async (path: string, args?: QueryArgs) => {
     return doGet({
         path,
         forceRefresh: false,
+        queryArgs: args,
     });
 };
-export const getSalesforceDataService = async (path: string) => {
+export const patchSalesforcePath = async (
+    path: string,
+    args?: QueryArgs,
+    body?: BodyArg
+) => {
+    return doPatch({
+        path,
+        forceRefresh: false,
+        queryArgs: args,
+        body: body,
+    });
+};
+const buildSalesforceDataServicePath = (path: string) => {
     let norm_path = path;
     if (path.indexOf("/") !== 0) {
         norm_path = `/${path}`;
     }
     const usepath = `/services/data/${env.api_version}${norm_path}`;
-    return getSalesforcePath(usepath);
+    return usepath;
+};
+export const getSalesforceDataService = async (
+    path: string,
+    args?: QueryArgs
+) => {
+    const usepath = buildSalesforceDataServicePath(path);
+    return getSalesforcePath(usepath, args);
+};
+export const patchSalesforceDataService = async (
+    path: string,
+    args?: QueryArgs,
+    body?: BodyArg
+) => {
+    const usepath = buildSalesforceDataServicePath(path);
+    return patchSalesforcePath(usepath, args, body);
 };

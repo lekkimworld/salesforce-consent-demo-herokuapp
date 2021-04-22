@@ -1,19 +1,9 @@
-<div class="rounded-md bg-blue-400 mx-auto max-w-sm p-6">
-    <img src="{{user.photo}}" class="w-10 h-10 rounded-full">        
-    <span>Hello {{user.fullname}} World!</span>
-    <p>ToS: {{user.terms.tos}}</p>
-    <p>Telemetry: {{user.terms.telemetry}}</p>
-    <p>Order: {{user.terms.order}}</p>
-    <p>Newsletter: {{user.terms.newsletter}}</p>
-    
-</div>
-{{#if user.terms.telemetry}}
 <p>
-    We are gathering app telemetry based on your preferences and consent.
+    <span class="inline text-gray-900">Hello {{user.fullname}}!</span>
 </p>
-{{/if}}
-{{#if user.terms.order}}
-<p>
-    <a href="/shop" class="text-blue-500">Shop</a>
+<p class="mt-4 text-gray-900">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec egestas, diam eu consectetur vestibulum, elit neque feugiat tellus, at rhoncus lorem nisl nec nisi. Phasellus a interdum turpis. Aenean elementum finibus nisl, ac sodales nibh rutrum sit amet. Praesent arcu purus, elementum nec volutpat ac, rutrum vel turpis. Cras purus diam, hendrerit eu odio quis, condimentum sollicitudin purus. Pellentesque at cursus mauris. Sed ligula nisi, vehicula vel orci vel, facilisis vehicula quam. Fusce eget sagittis nibh. Sed at purus quis ligula elementum pretium. Interdum et malesuada fames ac ante ipsum primis in faucibus. In feugiat porta aliquet. In hac habitasse platea dictumst.
 </p>
-{{/if}}
+<p class="mt-4 text-gray-900">
+    Ut aliquet nunc nec nibh fermentum, id pellentesque orci lacinia. Cras eget eleifend velit. Nunc nec mattis est. Curabitur dictum, felis non molestie dignissim, ante lorem suscipit nulla, eget fermentum risus felis ac purus. Aliquam finibus purus et tortor convallis vulputate. Aenean ornare hendrerit dui eget consequat. Morbi venenatis turpis vitae risus condimentum, a varius diam pellentesque. Nunc nec mauris at tortor imperdiet posuere quis vitae tortor. Phasellus leo elit, porta sed semper vitae, lobortis nec mi.
+</p>

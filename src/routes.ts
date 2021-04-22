@@ -18,6 +18,10 @@ export default (app: Application) => {
         renderTemplate(res, "auth_root");
     });
 
+    app.get("/terms", async (_req, res) => {
+        renderTemplate(res, "terms");
+    });
+
     app.get("/shop", async (_req, res) => {
         renderTemplate(res, "shop");
     });

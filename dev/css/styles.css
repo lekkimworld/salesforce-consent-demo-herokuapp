@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.menuitem:not(:first-child):before {
+    content: " | ";
+}
