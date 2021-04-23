@@ -177,13 +177,13 @@ const readConsentFromSalesforce = async (
         const readConsentRecord = (
             records: any[],
             purpose: string
-        ): boolean => {
+        ): boolean | undefined => {
             if (!records || !Array.isArray(records)) return false;
             const record = records.find(
                 (r: any) => r.DataUsePurpose.Name === purpose
             );
             if (record) return record.PrivacyConsentStatus === "OptIn";
-            return false;
+            return undefined;
         };
         const result = new TermsData();
         result.tos = readConsentRecord(data.records, "Terms of Service");
