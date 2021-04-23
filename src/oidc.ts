@@ -8,7 +8,6 @@ import {
     getSalesforceDataService,
     patchSalesforceDataService,
 } from "./fetch_util";
-import { pathToFileURL } from "node:url";
 
 const env = readEnvironment();
 
@@ -175,22 +174,22 @@ const readConsentFromSalesforce = async (
         );
         console.log(JSON.stringify(data, undefined, 2));
 
+        const readConsentRecord = (
+            records: any[],
+            purpose: string
+        ): boolean => {
+            if (!records || !Array.isArray(records)) return false;
+            const record = records.find(
+                (r: any) => r.DataUsePurpose.Name === purpose
+            );
+            if (record) return record.PrivacyConsentStatus === "OptIn";
+            return false;
+        };
         const result = new TermsData();
-        result.tos =
-            data.records.find(
-                (r: any) => r.DataUsePurpose.Name === "Terms of Service"
-            ).PrivacyConsentStatus === "OptIn";
-        result.telemetry =
-            data.records.find((r: any) => r.DataUsePurpose.Name === "Telemetry")
-                .PrivacyConsentStatus === "OptIn";
-        result.order =
-            data.records.find(
-                (r: any) => r.DataUsePurpose.Name === "Online Order"
-            ).PrivacyConsentStatus === "OptIn";
-        result.newsletter =
-            data.records.find(
-                (r: any) => r.DataUsePurpose.Name === "Newsletter"
-            ).PrivacyConsentStatus === "OptIn";
+        result.tos = readConsentRecord(data.records, "Terms of Service");
+        result.telemetry = readConsentRecord(data.records, "Telemetry");
+        result.order = readConsentRecord(data.records, "Online Order");
+        result.newsletter = readConsentRecord(data.records, "Newsletter");
         return result;
     }
 };
