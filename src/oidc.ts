@@ -251,6 +251,7 @@ export const ensureAuthenticated = (app: Application) => {
             // send to front page
             return renderTemplate(res, "unauth_root");
         }
+        if (req.path.startsWith("/oidc/logout")) return next();
 
         // user is authenticated
         res.locals.user = req.session.user;
