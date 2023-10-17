@@ -7,15 +7,7 @@
         what it means.
     </p>
     <p class="pt-4">
-        <input type="checkbox" name="telemetry" id="telemetry"> <label for="telemetry">Telemetry</label>
-    </p>
-    <p>
-        Telemetry is required for you to use this Fitness Tracker app. If you do not explicitly 
-        <span class="text-blue-500">Opt In</span> you cannot use this service and we will log 
-        you out of the app.
-    </p>
-    <p class="pt-4">
-        <input type="checkbox" name="order" id="order"> <label for="order">Order</label>
+        <input type="checkbox" name="order" id="order" {{#if order}}checked{{/if}}> <label for="order">Order</label>
     </p>
     <p>
         Order is required for you to order nutritional supplements, vitamings, branded apparal etc. 
@@ -23,14 +15,15 @@
         this part of the website. You may browse the catalog but not place an order online.
     </p>
     <p class="pt-4">
-        <input type="checkbox" name="newsletter" id="newsletter"> <label for="newsletter">Newsletter</label>
+        <input type="checkbox" name="newsletter" id="newsletter" {{#if newsletter}}checked{{/if}}> <label for="newsletter">Newsletter</label>
     </p>
     <p>
         Our monthly newsletter is a great way for you to stay in the know. If you do not explicitly 
         <span class="text-blue-500">Opt In</span> we will not send anything but transactional emails.
     </p>
     <div class="grid grid-cols-2 pt-4 gap-3">
-        <a href="#" id="btn_accept" class="bg-green-500 text-center text-white rounded-md p-2 uppercase">Accept Selected</a>
+        <a href="#" id="btn_accept_all" class="bg-green-500 text-center text-white rounded-md p-2 uppercase">Accept All</a>
+        <a href="#" id="btn_accept_selected" class="bg-green-500 text-center text-white rounded-md p-2 uppercase">Accept Selected</a>
         <a href="#" id="btn_decline" class="bg-red-500 text-center text-white rounded-md p-2 uppercase">Decline All</a>
     </div>
 </div>
@@ -38,13 +31,22 @@
     const $ = id => document.getElementById(id);
     $("btn_decline").addEventListener("click", () => {
         if (confirm("Are you sure you wish to decline all?")) {
-            document.location.href = "/terms/decline";
+            document.location.href = "/consent/declineall";
         }
     })
-    $("btn_accept").addEventListener("click", () => {
-        const telemetry = $("telemetry").checked;
+    $("btn_accept_all").addEventListener("click", () => {
+        document.location.href = `/consent/accept/true/true`;
+    })
+    $("btn_accept_selected").addEventListener("click", () => {
         const order = $("order").checked;
         const newsletter = $("newsletter").checked;
-        document.location.href = `/terms/accept/${telemetry}/${order}/${newsletter}`;
+        document.location.href = `/consent/accept/${order}/${newsletter}`;
+    })
+
+    window.SalesforceConsentDemo.onTelemetryReady(() => {
+        window.SalesforceConsentDemo.sendPageViewTelemetryEvent({
+        pageName: "consent"
+        })
     })
 </script>
+

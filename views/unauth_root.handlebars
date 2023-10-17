@@ -7,9 +7,15 @@
     </p>
     <p class="pt-4">
         <span class="text-blue-500">My Fitness Tracker</span> is the companion site to your fitness 
-        tracker or watch. To use the service please authenticate.
+        tracker or watch. To use the service please login.
     </p>
-    <p class="pt-8">
-        <a href="/oidc/login" class="bg-blue-500 text-white p-3 rounded-md w-96 uppercase text-center">authenticate</a>
-    </p>
+    
 </div>
+
+<script>
+  window.SalesforceConsentDemo.onTelemetryReady(() => {
+    window.SalesforceConsentDemo.sendPageViewTelemetryEvent({
+      pageName: "unauth_root"
+    })
+  })
+</script>

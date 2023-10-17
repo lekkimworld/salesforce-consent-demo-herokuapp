@@ -1,0 +1,158 @@
+// keep state and expose method to get it
+const telemetryStatus = {
+    optin: false,
+    telemetryId: "{{telemetryId}}"
+}
+const telemetryReadyPromise = new Promise((resolve) => {
+    const initSalesforceInteractions = async () => {
+        if (!window.SalesforceInteractions) {
+            console.log("SalesforceInteractions API not loaded - resolve promise and return...");
+            return resolve();
+        }
+
+        if (telemetryStatus.optin) {
+            // if opting in we initialize Salesforce Interactions
+            console.log(`Setting SalesforceInteractions anonymousId <${telemetryStatus.telemetryId}>`);
+            SalesforceInteractions.setAnonymousId(telemetryStatus.telemetryId);
+            SalesforceInteractions.setLoggingLevel(5);
+            await SalesforceInteractions.init({
+                consents: [{ 
+                    provider: 'MyFitnessTracker Provider', 
+                    purpose: 'Tracking', 
+                    status: SalesforceInteractions.ConsentStatus.OptIn 
+                }]
+            })
+            console.log(`Initialized SalesforceInteractions with anonymousId <${telemetryStatus.telemetryId}>`);
+
+            // show banner
+            document.getElementById("telemetry-banner").classList.toggle("hidden");
+        }
+
+        // resolve promise
+        console.log("Done initializing Salesforce Interactions");
+        resolve();
+    }
+
+    const loadConsentStatus = async () => {
+        // set consent status based on telemetryId from localStorage
+        let status = localStorage.getItem(telemetryStatus.telemetryId) || "none";
+        
+        // show consent modal or init interactions
+        if (status === "none") {
+            // user has not decided yet
+            showConsentModal();
+        } else if (status === "optin") {
+            // update state
+            telemetryStatus.optin = true;
+
+            // init
+            initSalesforceInteractions();
+        }
+    }
+
+    const isConsentModalVisible = () => {
+        return document.getElementById("modal-consent").hasAttribute("checked");
+    }
+
+    const showConsentModal = () => {
+        document.getElementById("modal-consent").setAttribute("checked", "1");
+    }
+
+    const closeConsentModal = () => document.getElementById("modal-consent").removeAttribute("checked");
+
+    const initClickHandler = () => {
+        // init click handler for modal consent dialog
+        document.querySelector(".modal").addEventListener("click", async (ev) => {
+            if (!isConsentModalVisible()) return;
+            const rel = ev.target.getAttribute("rel");
+            if (!rel) return;
+
+            // set value
+            let optin = false;
+            let optout = false;
+            if (rel === "consent_optin") {
+                optin = true;
+            } else if (rel === "consent_optout") {
+                optout = true;
+            }
+
+            // tell server status
+            console.log(`Storing consent status in localStorage - optin <${optin}> optout <${optout}>`);
+            localStorage.setItem(telemetryStatus.telemetryId, optin ? "optin" : "optout");
+            console.log(`Stored consent status in localStorage`);
+
+            // close modal
+            closeConsentModal();
+            
+            if (optin) {
+                telemetryStatus.optin = true;
+            }
+
+            // init 
+            initSalesforceInteractions();
+        })
+    }
+
+    // start when dom in loaded
+    addEventListener("DOMContentLoaded", (event) => {
+        // init click handler
+        initClickHandler();
+
+        // load consent status
+        loadConsentStatus(); 
+    });
+})
+
+const TELEMETRY_TYPES = {
+    ENGAGEMENT: "{{engagementEventName}}"
+}
+const sendTelemetryEvent = (payload) => {
+    if (!telemetryStatus.optin) {
+        console.log("User has not opted into telemetry - returning...");
+        return;
+    }
+    if (!window.SalesforceInteractions) {
+        console.log("SalesforceInteractions API not loaded - returning...");
+        return;
+    }
+    
+    // add data to interaction
+    const interaction = Object.assign({
+        anonymousId: telemetryStatus.telemetryId
+    }, payload);
+    console.log(`Created interaction for Salesforce Interactions`, interaction);
+
+    // send event
+    SalesforceInteractions.sendEvent({
+        interaction
+    });
+    console.log("Sent interaction through Salesforce Interactions");
+}
+
+// expose functionality through window object
+window.SalesforceConsentDemo = {};
+window.SalesforceConsentDemo.getTelemetryStatus = () => {
+    return Object.freeze(Object.assign({}, telemetryStatus));
+}
+window.SalesforceConsentDemo.sendPageViewTelemetryEvent = payload => {
+    sendTelemetryEvent(Object.assign({}, 
+        payload, 
+        {
+            "name": TELEMETRY_TYPES.ENGAGEMENT
+        }
+    ));
+}
+window.SalesforceConsentDemo.sendCatalogTelemetryEvent = payload => {
+    sendTelemetryEvent(Object.assign({}, 
+        {
+            "catalogObject": payload
+        }, 
+        {
+            "name": SalesforceInteractions.CatalogObjectInteractionName.ViewCatalogObject
+        }
+    ));
+}
+window.SalesforceConsentDemo.onTelemetryReady = async (cb) => {
+    await telemetryReadyPromise;
+    cb();
+}

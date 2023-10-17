@@ -7,38 +7,62 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title>{{PAGE_TITLE}}</title>
+  <link rel="icon" type="image/x-icon" href="/images/favicon.png">
   <link href="/css/styles.css" rel="stylesheet" type="text/css" />
   <meta name="theme-color" content="#fff">
 </head>
 <body class="bg-gray-100">
 
+{{#if cookieConsent}}
+<input class="modal-state" id="modal-consent" type="checkbox" />
+<div class="modal">
+  <label class="modal__bg" for="modal-consent-blur"></label>
+  <div class="modal__inner">
+    <label class="modal__close" for="modal-consent-close" rel="consent_optin" ></label>
+    <h1 class="font-extrabold text-gray-900 text-2xl pt-6">Consent</h1>
+    <p class="pt-4">
+        We use data from your browsing behavior to improve your experience and provide suggestions 
+        on this website. If you wish to opt-out of us using this kind of data please indicate so 
+        below. Cancelling out of this dialog is the same as opting in.
+    </p>
+    <p class="pt-8">
+        <a href="#" rel="consent_optin" class="bg-green-500 text-white p-3 rounded-md w-96 uppercase text-center">Opt-In</a>
+        <a href="#" rel="consent_optout" class="bg-red-500 text-white p-3 rounded-md w-96 uppercase text-center">Opt-Out</a>
+    </p>
+  </div>
+</div>
+{{#if datacloud}}
+<script src="{{datacloud.webSdkUrl}}"></script>
+{{/if}}
+<script src="/telemetry/telemetry.js"></script>
+{{/if}}
+
   <div id="main-body">
     <div class="pt-4 mx-2 max-w-sm sm:max-w-lg sm:mx-auto">
       <img src="/images/my_fitness_tracker_326x175.png" alt="Company Logo" class="">
-      {{#if user}}
       <ul>
         <li class="menuitem inline">
         <a href="/" class="text-blue-500">Home</a>
         </li>
-      {{#if user.terms.order}}
-      <li class="menuitem inline">
-          <a href="/shop" class="text-blue-500">Shop</a>
-      </li>
-      {{/if}}
-      <li class="menuitem inline"><a href="/terms" class="text-blue-500">Data Privacy and Consent</a></li>
-      <li class="menuitem inline"><a href="/oidc/logout" class="text-blue-500">Logout</a></li>
+        <li class="menuitem inline">
+            <a href="/shop" class="text-blue-500">Shop</a>
+        </li>
+        {{#if user}}
+        <li class="menuitem inline"><a href="/consent" class="text-blue-500">Data Privacy and Consent</a></li>
+        <li class="menuitem inline"><a href="/oidc/logout" class="text-blue-500">Logout</a></li>
+        {{else}}
+        <li class="menuitem inline"><a href="/oidc/login" class="text-blue-500">Login</a></li>
+        {{/if}}
       </ul>
-      {{/if}}
-      {{#if user.terms.telemetry}}
-      <p class="text-gray-600 text-xs">
+      
+      <p class="text-gray-600 text-xs hidden" id="telemetry-banner">
           We are gathering app telemetry based on your preferences and consent.
       </p>
-      {{/if}}
       <div class="pt-6">
       {{{body}}}
       </div>
     </div>
   </div>
-  
+
 </body>
 </html>

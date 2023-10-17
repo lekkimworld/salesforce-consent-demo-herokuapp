@@ -2,6 +2,7 @@ import { Application } from "express";
 import Handlebars from "handlebars";
 import exphbs from "express-handlebars";
 import readEnvironment from "./environment";
+import { AuthenticatedUser } from "./types";
 
 const env = readEnvironment();
 
@@ -38,10 +39,16 @@ export default (app: Application) => {
     });
 };
 
-export const buildContext = (user: any | undefined) => {
-    return {
+export const buildContext = (user: AuthenticatedUser | undefined) => {
+    let ctx : any = {
         portal: env.oidc.providerUrl,
         user,
         PAGE_TITLE: env.ui.pageTitle,
+        cookieConsent: !env.ui.cookieConsentDisable
     };
+    if (env.datacloud && env.datacloud.webSdkUrl) {
+        ctx.datacloud = {};
+        ctx.datacloud.webSdkUrl = env.datacloud.webSdkUrl;
+    }
+    return ctx;
 };

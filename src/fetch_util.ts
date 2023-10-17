@@ -1,8 +1,5 @@
 import fetch from "node-fetch";
-import jwtFactory from "jsonwebtoken";
 import readEnvironment from "./environment";
-import { discoverOidcData } from "./oidc";
-import { Client, Issuer } from "openid-client";
 
 const env = readEnvironment();
 
@@ -31,23 +28,16 @@ const getAccessToken = async (force_refresh: boolean = false) => {
     }
 
     // generate JWT and exchange for access_token
-    console.log("Getting access_token from JWT");
-    const oidcdata = await discoverOidcData();
-    const jwt = await jwtFactory.sign({}, env.jwt.privateKey, {
-        algorithm: "RS256",
-        audience: env.oidc.providerUrl,
-        issuer: env.jwt.clientId,
-        subject: env.jwt.subject,
-        expiresIn: 3 * 60,
-    });
-
-    const token_endpoint = oidcdata.metadata.token_endpoint;
-    let resp = await fetch(token_endpoint!, {
+    const token_endpoint = `${env.salesforce.myDomain}/services/oauth2/token`;
+    console.log(
+        `Getting access_token from Salesforce using client_credentials (endpoint <${token_endpoint}>)`
+    );
+    let resp = await fetch(token_endpoint, {
         headers: {
             "content-type": "application/x-www-form-urlencoded",
         },
         method: "POST",
-        body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+        body: `grant_type=client_credentials&client_id=${env.salesforce.clientId}&client_secret=${env.salesforce.clientSecret}`,
     });
 
     // get json and cache

@@ -38,6 +38,6 @@ export const getRedisClient = () => {
     return client;
 };
 export const getPromisifiedRedisClient = () => {
-    return client;
+    return promisifiedClient;
 };
 export default getPromisifiedRedisClient;

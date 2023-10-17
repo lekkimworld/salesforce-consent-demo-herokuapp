@@ -1,7 +1,19 @@
 <div class="text-gray-900 text-sm">
     <p>
-        You have not consented to the <span class="text-blue-500">My Fitness Tracker</span> App 
-        gathering telemetry so we cannot provide you service. Please go to the <a href="{{portal}}">Preference Center</a> 
+        You have not opted in to the latest terms of service for the 
+        <span class="text-blue-500">My Fitness Tracker</span> Inc. or you have revoked your 
+        consent. For you to use this app you must consent to the terms of service.
+    </p>
+    <p class="pt-4">
+        Please go to the <a href="{{portal}}">Preference Center</a> 
         and opt into the Terms of Service.
     </p>
 </div>
+
+<script>
+  window.SalesforceConsentDemo.onTelemetryReady(() => {
+    window.SalesforceConsentDemo.sendPageViewTelemetryEvent({
+      pageName: "terms_of_service_not_accepted"
+    })
+  })
+</script>

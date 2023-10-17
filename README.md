@@ -2,9 +2,8 @@
 Heroku app part of the Salesforce Consent Demo.
 
 ## Environment variables ##
-* `JWT_CLIENT_ID` (required, client ID from Connected App for JWT authentication ("id1_"))
-* `JWT_PRIVATE_KEY` (required, private key in PEM format as generated from the "org" repo)
-* `JWT_SUBJECT` (required, the username to impersonate when updating consent in Salesforce - should be the username of the scratch org user)
+* `CLIENTCREDS_CLIENT_ID` (required, client ID from Connected App for `client_credentials` authentication ("id1_"))
+* `CLIENTCREDS_CLIENT_SECRET` (required, client secret from Connected App for `client_credentials` authentication ("secret1_"))
 * `OIDC_CLIENT_ID` (required, client ID for OpenID Connect authentication ("id2_"))
 * `OIDC_CLIENT_SECRET` (required, client secret for OpenID Connect authentication ("secret2_"))
 * `OIDC_REDIRECT_URI` (required, redirection URI as specified in the Connected App for OpenID Connect authentication)

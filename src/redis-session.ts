@@ -3,7 +3,7 @@ import connectRedis from "connect-redis";
 import { Application } from "express";
 import { RedisClient } from "redis";
 import readEnvironment from "./environment";
-import { AuthenticatedUser } from "./oidc";
+import { AuthenticatedUser } from "./types";
 
 const env = readEnvironment();
 
@@ -11,6 +11,7 @@ declare module "express-session" {
     export interface SessionData {
         oidc_nonce: string | undefined;
         user: AuthenticatedUser;
+        consent: "optin"|"optout"|"none"
     }
 }
 
@@ -25,12 +26,12 @@ export default (app: Application, redisClient: RedisClient) => {
             store: new RedisStore({
                 client: redisClient,
             }),
-            saveUninitialized: false,
+            saveUninitialized: true,
             resave: false,
             secret: env.http.sessionSecret,
             cookie: env.production
                 ? {
-                      sameSite: "none",
+                      sameSite: true,
                       secure: true,
                   }
                 : undefined,
