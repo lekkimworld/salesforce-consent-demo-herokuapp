@@ -32,7 +32,7 @@ export default (app: Application, redisClient: RedisClient) => {
             cookie: env.production
                 ? {
                       sameSite: true,
-                      secure: true,
+                      secure: "auto",
                   }
                 : undefined,
         })
