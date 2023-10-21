@@ -19,7 +19,7 @@ export default (app: Application, redisClient: RedisClient) => {
     // configure session
     const RedisStore = connectRedis(session);
     if (env.production) {
-        app.set("trust proxy", 1);
+        app.enable("trust proxy");
     }
     app.use(
         session({
@@ -29,10 +29,8 @@ export default (app: Application, redisClient: RedisClient) => {
             saveUninitialized: true,
             resave: false,
             secret: env.http.sessionSecret,
-            proxy: env.production ? true : undefined,
             cookie: env.production
                 ? {
-                      sameSite: true,
                       secure: true
                   }
                 : undefined,
