@@ -40,15 +40,21 @@ export default (app: Application) => {
 };
 
 export const buildContext = (user: AuthenticatedUser | undefined) => {
-    let ctx : any = {
-        portal: env.oidc.providerUrl,
+    let ctx: any = {
+        salesforce: {
+            // url to Salesforce
+            experienceCloudUrl: env.oidc.providerUrl,
+        },
+        // user object
         user,
+        // page title
         PAGE_TITLE: env.ui.pageTitle,
-        cookieConsent: !env.ui.cookieConsentDisable
+        // indicates if cookie consent (i.e. we're asking the user) is enabled or not
+        cookieConsent: !env.ui.cookieConsentDisable,
     };
     if (env.datacloud && env.datacloud.webSdkUrl) {
         ctx.datacloud = {};
-        ctx.datacloud.webSdkUrl = env.datacloud.webSdkUrl;
+        ctx.datacloud.webSdkUrl = env.datacloud.webSdkUrl;      // url to the Data Cloud web sdk script
     }
     return ctx;
 };

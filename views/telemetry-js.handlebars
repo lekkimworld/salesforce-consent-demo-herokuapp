@@ -1,3 +1,8 @@
+// constants
+OPT_IN = "optin";
+OPT_OUT = "optout";
+OPT_NONE = "none";
+
 // keep state and expose method to get it
 const telemetryStatus = {
     optin: false,
@@ -23,11 +28,29 @@ const telemetryReadyPromise = new Promise((resolve) => {
                 }]
             })
             console.log(`Initialized SalesforceInteractions with anonymousId <${telemetryStatus.telemetryId}>`);
-
-            // show banner
-            document.getElementById("telemetry-banner").classList.toggle("hidden");
         }
 
+        // show banner allowing opt-in/opt-out of telemetry
+        const toggleOptInOut = (evt) => {
+            evt.preventDefault = true;
+            evt.stopPropagation();
+            if (evt.target.localName === "a") {
+                localStorage.setItem(telemetryStatus.telemetryId, telemetryStatus.optin ? OPT_OUT : OPT_IN);
+                document.location.reload();
+            }
+        }
+        if (telemetryStatus.optin) {
+            // show banner
+            const elem = document.getElementById("telemetry-optin-banner");
+            elem.addEventListener("click", toggleOptInOut);
+            elem.classList.toggle("hidden");
+        } else {
+            // show banner
+            const elem = document.getElementById("telemetry-optout-banner");
+            elem.addEventListener("click", toggleOptInOut);
+            elem.classList.toggle("hidden");
+        }
+        
         // resolve promise
         console.log("Done initializing Salesforce Interactions");
         resolve();
@@ -35,19 +58,19 @@ const telemetryReadyPromise = new Promise((resolve) => {
 
     const loadConsentStatus = async () => {
         // set consent status based on telemetryId from localStorage
-        let status = localStorage.getItem(telemetryStatus.telemetryId) || "none";
+        let status = localStorage.getItem(telemetryStatus.telemetryId) || OPT_NONE;
         
         // show consent modal or init interactions
-        if (status === "none") {
+        if (status === OPT_NONE) {
             // user has not decided yet
-            showConsentModal();
-        } else if (status === "optin") {
-            // update state
-            telemetryStatus.optin = true;
-
-            // init
-            initSalesforceInteractions();
+            return showConsentModal();
         }
+        
+        // update state
+        telemetryStatus.optin = status === OPT_IN;
+
+        // init
+        initSalesforceInteractions();
     }
 
     const isConsentModalVisible = () => {

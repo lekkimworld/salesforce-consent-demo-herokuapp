@@ -37,32 +37,35 @@
 <script src="/telemetry/telemetry.js"></script>
 {{/if}}
 
-  <div id="main-body">
-    <div class="pt-4 mx-2 max-w-sm sm:max-w-lg sm:mx-auto">
-      <img src="/images/my_fitness_tracker_326x175.png" alt="Company Logo" class="">
-      <ul>
-        <li class="menuitem inline">
-        <a href="/" class="text-blue-500">Home</a>
-        </li>
-        <li class="menuitem inline">
-            <a href="/shop" class="text-blue-500">Shop</a>
-        </li>
-        {{#if user}}
-        <li class="menuitem inline"><a href="/consent" class="text-blue-500">Data Privacy and Consent</a></li>
-        <li class="menuitem inline"><a href="/oidc/logout" class="text-blue-500">Logout</a></li>
-        {{else}}
-        <li class="menuitem inline"><a href="/oidc/login" class="text-blue-500">Login</a></li>
-        {{/if}}
-      </ul>
-      
-      <p class="text-gray-600 text-xs hidden" id="telemetry-banner">
-          We are gathering app telemetry based on your preferences and consent.
-      </p>
-      <div class="pt-6">
-      {{{body}}}
-      </div>
+<div id="main-body">
+  <div class="pt-4 mx-2 max-w-sm sm:max-w-lg sm:mx-auto">
+    <img src="/images/my_fitness_tracker_326x175.png" alt="Company Logo" class="">
+    <ul>
+      <li class="menuitem inline">
+      <a href="/" class="text-blue-500">Home</a>
+      </li>
+      <li class="menuitem inline">
+          <a href="/shop" class="text-blue-500">Shop</a>
+      </li>
+      {{#if user}}
+      <li class="menuitem inline"><a href="/consent" class="text-blue-500">Data Privacy and Consent</a></li>
+      <li class="menuitem inline"><a href="/oidc/logout" class="text-blue-500">Logout</a></li>
+      {{else}}
+      <li class="menuitem inline"><a href="/oidc/login" class="text-blue-500">Login</a></li>
+      {{/if}}
+    </ul>
+    
+    <p class="text-gray-600 text-xs hidden" id="telemetry-optin-banner" class="telemetry-banner">
+        We are gathering app telemetry based on your preferences and consent (<a href="javascript:void(0)">opt-out</a>).
+    </p>
+    <p class="text-gray-600 text-xs hidden" id="telemetry-optout-banner" class="telemetry-banner">
+        We are NOT gathering app telemetry to help us improve your experience (<a href="javascript:void(0)">opt-in</a>).
+    </p>
+    <div class="pt-6">
+    {{{body}}}
     </div>
   </div>
+</div>
 
 </body>
 </html>
